@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provechito — Macros simples. Comida real.</title>
+  <meta name="description" content="Registra tu comida por foto, código de barras, voz o texto. Provechito convierte lo que comes en macros claros, sin complicarte.">
+  <meta name="theme-color" content="#111311">
+  <meta property="og:title" content="Provechito — Macros simples. Comida real.">
+  <meta property="og:description" content="Tu comida, tus números y cero vueltas. Registra por foto, código de barras, voz o texto.">
+  <meta property="og:image" content="https://obedstudio.dev/provechito/assets/provechito-icon.png">
+  <meta property="og:url" content="https://obedstudio.dev/provechito/">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="/provechito/assets/provechito-icon.png">
+  <link rel="apple-touch-icon" href="/provechito/assets/provechito-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Figtree:wght@500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --night: #111311;
+      --night-soft: #191c19;
+      --night-raised: #20231f;
+      --cream: #fff3d4;
+      --cream-soft: #e8dcc0;
+      --muted: #a7a99f;
+      --green: #9cac16;
+      --green-bright: #c3d338;
+      --yellow: #ffb514;
+      --red: #f04124;
+      --red-deep: #b92a17;
+      --ink: #121310;
+      --line: rgba(255, 243, 212, .13);
+      --sans: "DM Sans", sans-serif;
+      --display: "Figtree", sans-serif;
+      --shadow: 0 28px 70px rgba(0, 0, 0, .32);
+      --max: 1160px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--cream);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(156, 172, 22, .09), transparent 25%),
+        radial-gradient(circle at 86% 16%, rgba(240, 65, 36, .08), transparent 27%),
+        repeating-linear-gradient(13deg, rgba(255,255,255,.012) 0 1px, transparent 1px 5px),
+        var(--night);
+      font-family: var(--sans);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .17;
+      mix-blend-mode: soft-light;
+      background-image:
+        radial-gradient(circle at 30% 20%, #fff 0 .55px, transparent .7px),
+        radial-gradient(circle at 70% 60%, #fff 0 .5px, transparent .65px);
+      background-size: 9px 11px, 13px 15px;
+      z-index: 99;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    .wrap { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
+    .skip {
+      position: fixed;
+      left: 16px;
+      top: -80px;
+      z-index: 100;
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: var(--cream);
+      color: var(--ink);
+    }
+    .skip:focus { top: 16px; }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(17, 19, 17, .82);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      font-family: var(--display);
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: -.5px;
+    }
+    .brand img {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .nav-links a:hover { color: var(--cream); }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 52px;
+      padding: 0 25px;
+      border: 0;
+      border-radius: 15px;
+      background: var(--yellow);
+      color: var(--ink);
+      font-weight: 900;
+      box-shadow: 0 8px 0 #ad7310, 0 15px 30px rgba(255,181,20,.12);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .button:hover { transform: translateY(-2px); box-shadow: 0 10px 0 #ad7310, 0 18px 34px rgba(255,181,20,.17); }
+    .button:active { transform: translateY(5px); box-shadow: 0 3px 0 #ad7310; }
+    .button.secondary {
+      background: transparent;
+      color: var(--cream);
+      border: 1px solid rgba(255,243,212,.35);
+      box-shadow: none;
+    }
+    .button.secondary:hover { border-color: var(--cream); box-shadow: none; }
+    .button.small { min-height: 42px; padding: 0 19px; border-radius: 13px; font-size: 14px; }
+
+    .hero {
+      min-height: 760px;
+      display: grid;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      align-items: center;
+      gap: 62px;
+      padding: 82px 0 112px;
+    }
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      color: var(--green-bright);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+    .kicker::before { content: ""; width: 34px; height: 4px; border-radius: 9px; background: var(--green); }
+    h1, h2, h3 { font-family: var(--display); margin: 0; }
+    h1 {
+      max-width: 760px;
+      font-size: clamp(56px, 7.4vw, 102px);
+      line-height: .91;
+      letter-spacing: -5px;
+      font-weight: 900;
+    }
+    h1 span {
+      display: block;
+      color: var(--yellow);
+      text-shadow: 0 5px 0 var(--red-deep);
+    }
+    .hero-copy {
+      max-width: 640px;
+      margin: 30px 0 32px;
+      color: var(--cream-soft);
+      font-size: clamp(18px, 2vw, 21px);
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .availability {
+      margin: 25px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .availability b { color: var(--green-bright); }
+
+    .hero-art { position: relative; min-height: 570px; display: grid; place-items: center; }
+    .icon-wrap {
+      position: relative;
+      width: min(480px, 100%);
+      z-index: 2;
+      transform: rotate(2deg);
+    }
+    .icon-wrap::before {
+      content: "";
+      position: absolute;
+      width: 78%;
+      height: 22%;
+      left: 12%;
+      bottom: -3%;
+      background: rgba(0,0,0,.74);
+      filter: blur(28px);
+      border-radius: 50%;
+      z-index: -1;
+    }
+    .icon-wrap img { border-radius: 27%; filter: drop-shadow(0 30px 45px rgba(0,0,0,.42)); }
+    .felt-shape {
+      position: absolute;
+      filter: drop-shadow(0 14px 12px rgba(0,0,0,.28));
+    }
+    .felt-shape::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .18;
+      background: repeating-linear-gradient(34deg, transparent 0 3px, rgba(0,0,0,.3) 4px);
+      clip-path: inherit;
+      border-radius: inherit;
+    }
+    .sun { width: 170px; height: 170px; right: -20px; top: 18px; border-radius: 50%; background: var(--yellow); }
+    .bean { width: 170px; height: 80px; left: -12px; bottom: 45px; border-radius: 65% 35% 60% 40%; background: var(--red); transform: rotate(24deg); }
+    .leaf { width: 90px; height: 45px; right: 2px; bottom: 64px; border-radius: 100% 0 100% 0; background: var(--green); transform: rotate(-26deg); }
+    .spark { width: 66px; height: 66px; left: 15px; top: 74px; background: var(--cream); clip-path: polygon(50% 0,61% 37%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 37%); }
+
+    .ticker {
+      border-bottom: 1px solid var(--line);
+      background: #171a17;
+      overflow: hidden;
+    }
+    .ticker-inner {
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      color: var(--cream-soft);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .ticker-item { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green-bright); box-shadow: 0 0 0 5px rgba(195,211,56,.09); }
+    .dot.yellow { background: var(--yellow); box-shadow: 0 0 0 5px rgba(255,181,20,.09); }
+    .dot.red { background: var(--red); box-shadow: 0 0 0 5px rgba(240,65,36,.09); }
+
+    section { padding: 118px 0; }
+    .section-head { max-width: 720px; margin-bottom: 54px; }
+    .eyebrow { color: var(--red); font-size: 12px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+    h2 {
+      margin-top: 12px;
+      font-size: clamp(39px, 5.2vw, 67px);
+      line-height: 1;
+      letter-spacing: -3px;
+    }
+    .section-head p { margin: 21px 0 0; color: var(--muted); font-size: 18px; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .step {
+      min-height: 300px;
+      padding: 31px;
+      color: var(--ink);
+      border-radius: 30px 16px 28px 18px;
+      background: var(--cream);
+      box-shadow: 0 9px 0 #cfc09c, var(--shadow);
+      transform: rotate(-.7deg);
+    }
+    .step:nth-child(2) { transform: rotate(.8deg); background: var(--yellow); box-shadow: 0 9px 0 #b8780b, var(--shadow); }
+    .step:nth-child(3) { transform: rotate(-.25deg); background: var(--green); box-shadow: 0 9px 0 #62700d, var(--shadow); }
+    .step-no {
+      width: 50px;
+      height: 50px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 48px;
+      border: 2px solid rgba(18,19,16,.28);
+      border-radius: 50%;
+      font-family: var(--display);
+      font-weight: 900;
+    }
+    .step h3 { font-size: 25px; letter-spacing: -.7px; }
+    .step p { margin: 13px 0 0; opacity: .72; }
+
+    .modes-section { background: var(--cream); color: var(--ink); position: relative; overflow: hidden; }
+    .modes-section::before, .modes-section::after {
+      content: "";
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      opacity: .11;
+    }
+    .modes-section::before { background: var(--red); left: -120px; top: 90px; }
+    .modes-section::after { background: var(--green); right: -130px; bottom: 80px; }
+    .modes-section .eyebrow { color: var(--red-deep); }
+    .modes-section .section-head p { color: #665e50; }
+    .mode-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; position: relative; z-index: 1; }
+    .mode-card {
+      min-height: 258px;
+      padding: 26px;
+      border: 2px solid #1f211e;
+      border-radius: 20px;
+      background: rgba(255,255,255,.26);
+      box-shadow: 5px 6px 0 #1f211e;
+    }
+    .mode-icon {
+      width: 55px;
+      height: 55px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 37px;
+      border-radius: 16px;
+      background: var(--red);
+      color: white;
+      font-size: 24px;
+      font-weight: 900;
+      transform: rotate(-3deg);
+    }
+    .mode-card:nth-child(2) .mode-icon { background: var(--yellow); color: var(--ink); transform: rotate(2deg); }
+    .mode-card:nth-child(3) .mode-icon { background: var(--green); color: var(--ink); transform: rotate(-2deg); }
+    .mode-card:nth-child(4) .mode-icon { background: var(--night); transform: rotate(3deg); }
+    .mode-card h3 { font-size: 23px; }
+    .mode-card p { margin: 11px 0 0; color: #675f51; font-size: 15px; }
+    .free-tag {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 5px 9px;
+      border: 1px solid rgba(18,19,16,.3);
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .showcase { overflow: hidden; }
+    .showcase-grid { display: grid; grid-template-columns: .92fr 1.08fr; gap: 75px; align-items: center; }
+    .phone-stage { min-height: 630px; display: grid; place-items: center; position: relative; }
+    .phone {
+      width: 320px;
+      padding: 13px;
+      border: 3px solid #373a35;
+      border-radius: 55px;
+      background: #0a0b0a;
+      box-shadow: var(--shadow);
+      transform: rotate(-2.5deg);
+      position: relative;
+      z-index: 2;
+    }
+    .phone img { border-radius: 42px; }
+    .food-disc {
+      position: absolute;
+      width: 390px;
+      height: 390px;
+      border-radius: 50%;
+      background: url("/provechito/assets/food-tacos.jpg") center/cover;
+      right: -75px;
+      top: 40px;
+      border: 12px solid var(--yellow);
+      box-shadow: var(--shadow);
+      opacity: .92;
+    }
+    .macro-chip {
+      position: absolute;
+      z-index: 4;
+      min-width: 124px;
+      padding: 14px 17px;
+      border: 2px solid #090a09;
+      border-radius: 17px;
+      background: var(--green-bright);
+      color: var(--ink);
+      box-shadow: 5px 6px 0 #090a09;
+      font-weight: 900;
+    }
+    .macro-chip small { display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+    .macro-chip strong { font-family: var(--display); font-size: 24px; }
+    .chip-one { left: 4px; top: 90px; transform: rotate(-6deg); }
+    .chip-two { right: 14px; bottom: 95px; background: var(--red); color: white; transform: rotate(5deg); }
+    .feature-list { display: grid; gap: 14px; margin: 34px 0 36px; }
+    .feature {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 13px;
+      align-items: start;
+      color: var(--cream-soft);
+    }
+    .check {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--green);
+      color: var(--ink);
+      font-weight: 900;
+      transform: rotate(-3deg);
+    }
+    .feature b { color: var(--cream); }
+
+    .pantry {
+      padding-top: 30px;
+    }
+    .pantry-card {
+      min-height: 550px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 38px;
+      background: var(--night-raised);
+      box-shadow: var(--shadow);
+    }
+    .pantry-image { min-height: 480px; background: linear-gradient(rgba(17,19,17,.05), rgba(17,19,17,.5)), url("/provechito/assets/food-pantry.jpg") center/cover; }
+    .pantry-copy { padding: 65px; align-self: center; }
+    .premium { display: inline-block; padding: 6px 11px; border-radius: 9px; background: var(--yellow); color: var(--ink); font-size: 11px; font-weight: 900; letter-spacing: 1.3px; text-transform: uppercase; transform: rotate(-1deg); }
+    .pantry h2 { margin-top: 23px; font-size: clamp(37px, 4.8vw, 62px); }
+    .pantry p { color: var(--muted); font-size: 18px; }
+
+    .pricing { background: #181a17; }
+    .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .price-card {
+      padding: 42px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--night-raised);
+    }
+    .price-card.featured {
+      border: 2px solid var(--yellow);
+      box-shadow: 8px 9px 0 var(--yellow);
+      transform: rotate(.4deg);
+    }
+    .price-card h3 { font-size: 30px; }
+    .price { margin: 22px 0 4px; font-family: var(--display); font-size: 57px; font-weight: 900; line-height: 1; }
+    .price small { font-size: 18px; color: var(--muted); }
+    .price-card > p { color: var(--muted); }
+    .price-list { display: grid; gap: 12px; margin: 28px 0 34px; padding: 0; list-style: none; color: var(--cream-soft); }
+    .price-list li::before { content: "✓"; margin-right: 11px; color: var(--green-bright); font-weight: 900; }
+
+    .faq-grid { display: grid; grid-template-columns: .75fr 1.25fr; gap: 76px; align-items: start; }
+    .faq-grid h2 { position: sticky; top: 120px; }
+    details { border-top: 1px solid var(--line); }
+    details:last-child { border-bottom: 1px solid var(--line); }
+    summary {
+      padding: 25px 4px;
+      cursor: pointer;
+      list-style: none;
+      font-family: var(--display);
+      font-size: 21px;
+      font-weight: 800;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; float: right; color: var(--yellow); font-size: 29px; line-height: .8; }
+    details[open] summary::after { content: "–"; }
+    details p { margin: -8px 42px 25px 4px; color: var(--muted); }
+
+    .final-cta { padding-top: 35px; }
+    .cta-card {
+      position: relative;
+      overflow: hidden;
+      padding: 82px 70px;
+      border-radius: 44px 24px 46px 22px;
+      background: var(--red);
+      color: white;
+      box-shadow: 0 12px 0 var(--red-deep), var(--shadow);
+    }
+    .cta-card h2 { max-width: 780px; font-size: clamp(48px, 7vw, 88px); letter-spacing: -4px; }
+    .cta-card p { max-width: 600px; margin: 24px 0 32px; font-size: 19px; opacity: .88; }
+    .cta-card .button { background: var(--cream); box-shadow: 0 8px 0 #bda777; }
+    .cta-circle { position: absolute; width: 290px; height: 290px; border-radius: 50%; right: -80px; top: -80px; background: var(--yellow); opacity: .9; }
+    .cta-leaf { position: absolute; width: 140px; height: 70px; right: 70px; bottom: 35px; border-radius: 100% 0 100% 0; background: var(--green); transform: rotate(-25deg); }
+
+    footer { padding: 70px 0 38px; }
+    .footer-top { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+    .footer-links { display: flex; gap: 25px; color: var(--muted); font-size: 14px; font-weight: 700; }
+    .legal { margin: 28px 0 0; color: #777a72; font-size: 12px; max-width: 860px; }
+
+    @media (max-width: 920px) {
+      .nav-links a:not(.button) { display: none; }
+      .hero-grid, .showcase-grid, .pantry-card, .faq-grid { grid-template-columns: 1fr; }
+      .hero-grid { padding-top: 62px; gap: 30px; }
+      .hero-copy { max-width: 720px; }
+      .hero-art { min-height: 470px; }
+      .icon-wrap { width: 410px; }
+      .steps { grid-template-columns: 1fr; }
+      .step { min-height: 230px; }
+      .step-no { margin-bottom: 28px; }
+      .mode-grid { grid-template-columns: 1fr 1fr; }
+      .phone-stage { order: 2; }
+      .pantry-image { min-height: 410px; }
+      .faq-grid h2 { position: static; }
+    }
+    @media (max-width: 620px) {
+      .wrap { width: min(100% - 28px, var(--max)); }
+      .nav-inner { min-height: 66px; }
+      .brand { font-size: 18px; }
+      .brand img { width: 36px; height: 36px; }
+      .nav .button.small { min-height: 38px; padding: 0 13px; font-size: 12px; }
+      .hero { min-height: auto; }
+      .hero-grid { padding: 50px 0 72px; }
+      h1 { font-size: clamp(52px, 17vw, 78px); letter-spacing: -3.5px; }
+      .hero-copy { font-size: 17px; }
+      .hero-actions .button { width: 100%; }
+      .hero-art { min-height: 390px; }
+      .icon-wrap { width: 330px; }
+      .sun { width: 120px; height: 120px; right: -25px; }
+      .bean { width: 120px; height: 62px; }
+      .spark { width: 45px; height: 45px; left: 0; }
+      .ticker-inner { justify-content: flex-start; overflow: hidden; }
+      .ticker-item:nth-child(n+3) { display: none; }
+      section { padding: 82px 0; }
+      h2 { letter-spacing: -2px; }
+      .mode-grid, .price-grid { grid-template-columns: 1fr; }
+      .mode-card { min-height: 220px; }
+      .phone-stage { min-height: 530px; transform: scale(.88); margin: -30px 0; }
+      .food-disc { width: 300px; height: 300px; right: -35px; }
+      .pantry-copy { padding: 42px 28px; }
+      .price-card { padding: 30px 25px; }
+      .cta-card { padding: 55px 27px; }
+      .cta-card h2 { letter-spacing: -2.5px; }
+      .cta-circle { width: 170px; height: 170px; opacity: .22; }
+      .cta-leaf { opacity: .25; }
+      .footer-top { align-items: flex-start; flex-direction: column; }
+      .footer-links { flex-wrap: wrap; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+
+  <nav class="nav" aria-label="Navegación principal">
+    <div class="wrap nav-inner">
+      <a class="brand" href="/provechito/" aria-label="Provechito, inicio">
+        <img src="/provechito/assets/provechito-icon.png" alt="">
+        <span>provechito</span>
+      </a>
+      <div class="nav-links">
+        <a href="#como">Cómo funciona</a>
+        <a href="#registro">Cómo registrar</a>
+        <a href="#premium">Premium</a>
+        <a class="button small" href="https://apps.apple.com/mx/app/macros/id6782473761">Descargar gratis</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="contenido">
+    <header class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="kicker">Hecho para la comida real</div>
+          <h1>Macros simples.<span>Comida real.</span></h1>
+          <p class="hero-copy">Fotografía tu plato, escanea un producto, dilo con tu voz o escríbelo. Provechito convierte lo que comes en números claros para que sigas tu día, no una hoja de cálculo.</p>
+          <div class="hero-actions">
+            <a class="button" href="https://apps.apple.com/mx/app/macros/id6782473761">Descárgala en el App Store <span aria-hidden="true">↗</span></a>
+            <a class="button secondary" href="#como">Así funciona <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="availability"><b>Gratis para empezar</b> · Sin tarjeta · Español e inglés</p>
+        </div>
+        <div class="hero-art" aria-label="Nuevo ícono de Provechito: un taco con barras de macronutrientes">
+          <span class="felt-shape sun" aria-hidden="true"></span>
+          <span class="felt-shape bean" aria-hidden="true"></span>
+          <span class="felt-shape leaf" aria-hidden="true"></span>
+          <span class="felt-shape spark" aria-hidden="true"></span>
+          <div class="icon-wrap">
+            <img src="/provechito/assets/provechito-icon.png" alt="Ícono de Provechito, un taco completo con barras verdes, amarillas y rojas y dos hojas verdes">
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="ticker" aria-label="Beneficios principales">
+      <div class="wrap ticker-inner">
+        <div class="ticker-item"><span class="dot"></span>Porciones que tú controlas</div>
+        <div class="ticker-item"><span class="dot yellow"></span>Fuentes nutricionales citadas</div>
+        <div class="ticker-item"><span class="dot red"></span>Sin anuncios ni venta de datos</div>
+        <div class="ticker-item"><span class="dot"></span>Hecho en español</div>
+      </div>
+    </div>
+
+    <section id="como">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Cero vueltas</span>
+          <h2>Tu plato a tus números en tres pasos.</h2>
+          <p>Menos buscar, medir y adivinar. Más claridad para decidir qué te funciona hoy.</p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <div class="step-no">01</div>
+            <h3>Registra como quieras</h3>
+            <p>Usa una foto, el código de barras, tu voz o texto. Elige lo que te quede más fácil en ese momento.</p>
+          </article>
+          <article class="step">
+            <div class="step-no">02</div>
+            <h3>Confirma y ajusta</h3>
+            <p>Revisa ingredientes y porciones. Cambia piezas, tazas o gramos con un toque. Tú tienes la última palabra.</p>
+          </article>
+          <article class="step">
+            <div class="step-no">03</div>
+            <h3>Sigue con tu día</h3>
+            <p>Ve tu avance contra tus metas y decide con contexto. Sin culpa, sin sermones, sin complicaciones.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="modes-section" id="registro">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Cuatro maneras de registrar</span>
+          <h2>La misma claridad, comas como comas.</h2>
+          <p>Un plato casero no se registra igual que un yogurt del súper. Provechito se adapta al momento.</p>
+        </div>
+        <div class="mode-grid">
+          <article class="mode-card">
+            <div class="mode-icon" aria-hidden="true">◎</div>
+            <h3>Foto</h3>
+            <p>Para el plato sin etiqueta. Obtén un desglose editable por ingrediente y ajusta la porción.</p>
+            <span class="free-tag">3 al día gratis</span>
+          </article>
+          <article class="mode-card">
+            <div class="mode-icon" aria-hidden="true">▥</div>
+            <h3>Código de barras</h3>
+            <p>Apunta al producto y recibe sus datos nutrimentales sin buscar entre resultados.</p>
+            <span class="free-tag">Gratis e ilimitado</span>
+          </article>
+          <article class="mode-card">
+            <div class="mode-icon" aria-hidden="true">◖</div>
+            <h3>Voz</h3>
+            <p>Di lo que comiste como lo dirías en voz alta. Ideal cuando tienes las manos ocupadas.</p>
+            <span class="free-tag">Con Premium</span>
+          </article>
+          <article class="mode-card">
+            <div class="mode-icon" aria-hidden="true">Aa</div>
+            <h3>Texto</h3>
+            <p>Escribe “sándwich de pollo y café” y ajusta los detalles antes de guardarlo.</p>
+            <span class="free-tag">Incluido gratis</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="showcase">
+      <div class="wrap showcase-grid">
+        <div class="phone-stage" aria-label="Vista del tablero de Provechito">
+          <div class="food-disc" aria-hidden="true"></div>
+          <div class="macro-chip chip-one"><small>Proteína</small><strong>25 g</strong></div>
+          <div class="macro-chip chip-two"><small>Te quedan</small><strong>640 kcal</strong></div>
+          <div class="phone">
+            <img src="/provechito/assets/dashboard-screenshot.jpg" alt="Tablero diario con calorías, proteína, grasa y carbohidratos">
+          </div>
+        </div>
+        <div>
+          <span class="eyebrow">Una mirada basta</span>
+          <h2>Lo importante, siempre a la vista.</h2>
+          <p class="hero-copy">Tu comida y tus metas viven en el mismo lugar. Provechito te ayuda a entender el día completo sin convertir cada bocado en una tarea.</p>
+          <div class="feature-list">
+            <div class="feature"><span class="check">✓</span><span><b>Metas realmente tuyas.</b> Se calculan con tu edad, actividad, objetivo y preferencias.</span></div>
+            <div class="feature"><span class="check">✓</span><span><b>Datos que puedes corregir.</b> Ajusta ingredientes o porciones y ve los números recalcularse.</span></div>
+            <div class="feature"><span class="check">✓</span><span><b>Decisiones antes de comer.</b> Revisa si un platillo cabe en lo que te queda del día.</span></div>
+            <div class="feature"><span class="check">✓</span><span><b>Hábitos sin regaños.</b> Diario, agua, racha e historial para acompañarte, no juzgarte.</span></div>
+          </div>
+          <a class="button secondary" href="https://apps.apple.com/mx/app/macros/id6782473761">Ver en el App Store</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="pantry">
+      <div class="wrap">
+        <article class="pantry-card">
+          <div class="pantry-image" role="img" aria-label="Alacena con ingredientes cotidianos"></div>
+          <div class="pantry-copy">
+            <span class="premium">Premium</span>
+            <h2>Tu alacena ya tiene ideas.</h2>
+            <p>Fotografía tu refri o despensa y recibe sugerencias que toman en cuenta lo que tienes y lo que te queda del día. Cocinaste, registraste: un solo flujo.</p>
+            <div class="feature-list">
+              <div class="feature"><span class="check">✓</span><span>Guarda ingredientes por foto, voz o escaneo.</span></div>
+              <div class="feature"><span class="check">✓</span><span>Obtén platillos posibles, no recetas de revista.</span></div>
+              <div class="feature"><span class="check">✓</span><span>Recibe plan semanal y lista del súper.</span></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="pricing" id="premium">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Empieza a tu ritmo</span>
+          <h2>Gratis para lo esencial. Premium para ir más lejos.</h2>
+          <p>Registra tu comida y sigue tus metas sin límite de tiempo. Activa Premium cuando quieras más análisis y planeación.</p>
+        </div>
+        <div class="price-grid">
+          <article class="price-card">
+            <h3>Gratis</h3>
+            <div class="price">$0</div>
+            <p>Sin tarjeta. Sin caducidad.</p>
+            <ul class="price-list">
+              <li>Escáner de código de barras ilimitado</li>
+              <li>Hasta 3 registros por foto al día</li>
+              <li>Registro por texto</li>
+              <li>Metas, diario, agua y racha</li>
+              <li>Historial de los últimos 7 días</li>
+            </ul>
+            <a class="button secondary" href="https://apps.apple.com/mx/app/macros/id6782473761">Empezar gratis</a>
+          </article>
+          <article class="price-card featured">
+            <span class="premium">7 días gratis</span>
+            <h3 style="margin-top:20px">Premium</h3>
+            <div class="price">$999 <small>MXN / año</small></div>
+            <p>Sale en $83 al mes. Cancela cuando quieras.</p>
+            <ul class="price-list">
+              <li>Foto, texto y voz sin topes diarios</li>
+              <li>Coaching personalizado con IA</li>
+              <li>Historial completo y tendencias</li>
+              <li>“¿Qué cocino?” completo</li>
+              <li>Plan semanal y lista del súper</li>
+            </ul>
+            <a class="button" href="https://apps.apple.com/mx/app/macros/id6782473761">Probar Premium</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap faq-grid">
+        <div>
+          <span class="eyebrow">Preguntas frecuentes</span>
+          <h2>Antes del primer bocado.</h2>
+        </div>
+        <div>
+          <details>
+            <summary>¿Funciona con cualquier tipo de comida?</summary>
+            <p>Sí. Provechito está pensado para comida real de todos los días: casera, de restaurante, empacada o preparada. Su identidad visual es mexicana; su seguimiento no está limitado a una cocina.</p>
+          </details>
+          <details>
+            <summary>¿Qué tan precisas son las fotos?</summary>
+            <p>La foto ofrece una estimación práctica y un desglose visible. Como una imagen no puede saber cada ingrediente o cantidad con certeza, siempre puedes corregir nombres, ingredientes y porciones antes de guardar.</p>
+          </details>
+          <details>
+            <summary>¿De verdad hay una versión gratis?</summary>
+            <p>Sí. El escáner de códigos, las metas, el diario y el registro básico son gratis sin límite de tiempo. Premium elimina topes y añade voz, coaching y planeación.</p>
+          </details>
+          <details>
+            <summary>¿Qué pasa con mis datos?</summary>
+            <p>Tu diario es tuyo. Provechito no tiene anuncios y no vende tus datos. Consulta la política de privacidad para conocer los detalles.</p>
+          </details>
+          <details>
+            <summary>¿Está disponible para Android?</summary>
+            <p>Por ahora Provechito está disponible para iPhone con iOS 16 o superior.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="wrap">
+        <div class="cta-card">
+          <span class="cta-circle" aria-hidden="true"></span>
+          <span class="cta-leaf" aria-hidden="true"></span>
+          <div style="position:relative;z-index:2">
+            <span class="eyebrow" style="color:#fff3d4">Hoy se come bien</span>
+            <h2>Que tus macros se sientan más provechito.</h2>
+            <p>Descarga la app y registra tu primera comida en menos de un minuto. Tú eliges el camino.</p>
+            <a class="button" href="https://apps.apple.com/mx/app/macros/id6782473761">Descárgala gratis <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-top">
+        <a class="brand" href="/provechito/">
+          <img src="/provechito/assets/provechito-icon.png" alt="">
+          <span>provechito</span>
+        </a>
+        <div class="footer-links">
+          <a href="mailto:support@obedstudio.dev">Soporte</a>
+          <a href="/privacy/">Privacidad</a>
+          <a href="/terms/">Términos</a>
+          <a href="https://apps.apple.com/mx/app/macros/id6782473761">App Store</a>
+        </div>
+      </div>
+      <p class="legal">© 2026 Obed Studio. Provechito no reemplaza el consejo de un profesional de salud. Las estimaciones nutricionales pueden variar según ingredientes, porciones y preparación, pero te dan una base práctica para comer con más conciencia.</p>
+    </div>
+  </footer>
+</body>
+</html>
