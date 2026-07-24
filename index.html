@@ -436,10 +436,12 @@
     .mascots .eyebrow { color: var(--red-deep); }
     .mascots p { color: #665e50; font-size: 18px; max-width: 590px; }
     .mascot-row { display: flex; align-items: end; justify-content: center; gap: 16px; min-height: 280px; }
-    .mascot-card { display: grid; place-items: center; width: 31%; aspect-ratio: .86; padding: 14px; border-radius: 28px 20px 26px 18px; background: #f7e7bd; box-shadow: 6px 8px 0 rgba(35,32,25,.18); transform: rotate(-4deg); }
+    .mascot-card { display: flex; flex-direction: column; align-items: center; width: 31%; min-height: 320px; padding: 14px 14px 20px; border-radius: 28px 20px 26px 18px; background: #f7e7bd; box-shadow: 6px 8px 0 rgba(35,32,25,.18); text-align: center; transform: rotate(-4deg); }
     .mascot-card:nth-child(2) { background: #e4b930; transform: translateY(-20px) rotate(3deg); }
     .mascot-card:nth-child(3) { background: #d64c32; transform: rotate(-2deg); }
-    .mascot-card img { width: 100%; max-width: 150px; object-fit: contain; filter: drop-shadow(0 8px 6px rgba(0,0,0,.18)); }
+    .mascot-card img { width: 100%; max-width: 128px; max-height: 145px; object-fit: contain; filter: drop-shadow(0 8px 6px rgba(0,0,0,.18)); }
+    .mascot-card h3 { margin: 8px 0 4px; font-size: 20px; }
+    .mascot-card p { margin: 0; color: #534a3a; font-size: 13px; line-height: 1.35; }
 
     .pricing { background: #181a17; }
     .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
@@ -541,6 +543,7 @@
       .food-disc { width: 300px; height: 300px; right: -35px; }
       .pantry-copy { padding: 42px 28px; }
       .mascot-row { min-height: 225px; }
+      .mascot-card { min-height: 285px; }
       .price-card { padding: 30px 25px; }
       .cta-card { padding: 55px 27px; }
       .cta-card h2 { letter-spacing: -2.5px; }
@@ -722,9 +725,21 @@
           <p>Sin regaños. Sin perfección. Solo pequeños avances que sí caben en tu vida.</p>
         </div>
         <div class="mascot-row" aria-label="Las mascotas de Provechito">
-          <div class="mascot-card"><img src="/provechito/assets/mascot-aguacate.png" alt="Mascota aguacate de Provechito"></div>
-          <div class="mascot-card"><img src="/provechito/assets/mascot-lechuga.png" alt="Mascota lechuga de Provechito"></div>
-          <div class="mascot-card"><img src="/provechito/assets/mascot-perrito.png" alt="Mascota perrito de Provechito"></div>
+          <div class="mascot-card">
+            <img src="/provechito/assets/mascot-aguacate.png" alt="Aguacate, la mascota luchadora de Provechito">
+            <h3>Aguacate</h3>
+            <p>El luchador. Puro hype, cero mala vibra; celebra tus metas como un campeonato.</p>
+          </div>
+          <div class="mascot-card">
+            <img src="/provechito/assets/mascot-lechuga.png" alt="Lechuga, la mascota tranquila de Provechito">
+            <h3>Lechuga</h3>
+            <p>La tranquila. Fresca, organizada y práctica: te ayuda sin complicarte la vida.</p>
+          </div>
+          <div class="mascot-card">
+            <img src="/provechito/assets/mascot-perrito.png" alt="Perrito, la mascota leal de Provechito">
+            <h3>Perrito</h3>
+            <p>El fiel. Celebra cada avance y mañana vuelve moviendo la cola, pase lo que pase hoy.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -750,19 +765,6 @@
             </ul>
             <a class="button secondary" href="https://apps.apple.com/mx/app/macros/id6782473761">Empezar gratis</a>
           </article>
-          <article class="price-card">
-            <h3>Premium mensual</h3>
-            <div class="price">$99 <small>MXN / mes</small></div>
-            <p>Flexibilidad total. Cancela cuando quieras.</p>
-            <ul class="price-list">
-              <li>Foto, texto y voz sin topes diarios</li>
-              <li>Coaching personalizado con IA</li>
-              <li>Historial completo y tendencias</li>
-              <li>“¿Qué cocino?” completo</li>
-              <li>Plan semanal y lista del súper</li>
-            </ul>
-            <a class="button secondary" href="https://apps.apple.com/mx/app/macros/id6782473761">Elegir mensual</a>
-          </article>
           <article class="price-card featured">
             <span class="premium">7 días gratis</span>
             <h3 style="margin-top:20px">Premium</h3>
@@ -776,6 +778,19 @@
               <li>Plan semanal y lista del súper</li>
             </ul>
             <a class="button" href="https://apps.apple.com/mx/app/macros/id6782473761">Probar Premium</a>
+          </article>
+          <article class="price-card">
+            <h3>Premium mensual</h3>
+            <div class="price">$99 <small>MXN / mes</small></div>
+            <p>Flexibilidad total. Cancela cuando quieras.</p>
+            <ul class="price-list">
+              <li>Foto, texto y voz sin topes diarios</li>
+              <li>Coaching personalizado con IA</li>
+              <li>Historial completo y tendencias</li>
+              <li>“¿Qué cocino?” completo</li>
+              <li>Plan semanal y lista del súper</li>
+            </ul>
+            <a class="button secondary" href="https://apps.apple.com/mx/app/macros/id6782473761">Elegir mensual</a>
           </article>
         </div>
       </div>
