@@ -50,3 +50,13 @@ test("allows the click write to finish after the bounded redirect", () => {
   assert.match(page, /keepalive:\s*true/);
   assert.doesNotMatch(page, /AbortController/);
 });
+
+test("the Instagram alias forwards to the tracked campaign URL without its own analytics", () => {
+  const page = fs.readFileSync(path.join(__dirname, "../ig/index.html"), "utf8");
+  const campaignUrl = "https://provechito.app/go/?pt=129032855&ct=pvc26igtinga01&utm_id=pvc26_install_macrotrackers_instagram_202608_01&utm_source=instagram&utm_medium=organic&utm_campaign=real-food-macros-aug&utm_content=bio_tinga_macroproof_download_v01&utm_term=macrotrackers";
+  const escapedCampaignUrl = campaignUrl.replaceAll("&", "&amp;");
+
+  assert.ok(page.includes(`http-equiv="refresh" content="0; url=${escapedCampaignUrl}"`));
+  assert.ok(page.includes(`href="${escapedCampaignUrl}"`));
+  assert.doesNotMatch(page, /campaign-clicks|campaign-attribution\.js|apps\.apple\.com/);
+});
