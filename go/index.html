@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#111311">
-  <title>Abriendo Provechito…</title>
+  <title>Descarga Provechito</title>
   <link rel="icon" type="image/png" href="/assets/provechito-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,9 +20,9 @@
   <main>
     <img src="/assets/provechito-icon.png" alt="Icono de Provechito">
     <section id="loading">
-      <h1>Abriendo Provechito…</h1>
-      <p>Te llevamos al App Store para descargar gratis en tu iPhone.</p>
-      <p class="small">Si no se abre automáticamente, usa el botón de abajo.</p>
+      <h1>Descarga Provechito</h1>
+      <p>Toca el botón para abrir el App Store y descargar gratis en tu iPhone.</p>
+      <p class="small">¿Instagram no abre el App Store? Toca ⋯ arriba y elige “Abrir en el navegador externo”.</p>
       <a id="continue-link" class="button" href="https://apps.apple.com/app/apple-store/id6782473761">Continuar al App Store</a>
     </section>
     <section id="fallback" hidden>
@@ -42,24 +42,20 @@
       const destination = window.ProvechitoCampaign.buildAppStoreUrl(result.fields);
       const link = document.getElementById("continue-link");
       link.href = destination;
-      const click = window.ProvechitoCampaign.buildClickPayload(result.fields, crypto.randomUUID());
-      let redirected = false;
-      const redirect = function () {
-        if (redirected) return;
-        redirected = true;
-        window.location.replace(destination);
-      };
-      const timer = window.setTimeout(redirect, 750);
-
-      fetch("https://api.obedstudio.dev/v1/campaign-clicks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(click),
-        // Let this small request finish if navigation wins the 750 ms race.
-        keepalive: true,
-        credentials: "omit",
-        referrerPolicy: "no-referrer"
-      }).catch(function () {}).finally(function () { window.clearTimeout(timer); redirect(); });
+      const clickId = window.ProvechitoCampaign.createClickId(window.crypto);
+      if (clickId) {
+        const click = window.ProvechitoCampaign.buildClickPayload(result.fields, clickId);
+        // Tracking must never delay or trigger navigation. Embedded browsers only
+        // permit the App Store handoff from the user's direct anchor tap.
+        fetch("https://api.obedstudio.dev/v1/campaign-clicks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(click),
+          keepalive: true,
+          credentials: "omit",
+          referrerPolicy: "no-referrer"
+        }).catch(function () {});
+      }
     })();
   </script>
 </body>

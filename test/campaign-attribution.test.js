@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { APP_STORE_BASE, buildAppStoreUrl, buildClickPayload, validateCampaignParams } = require("../campaign-attribution.js");
+const { APP_STORE_BASE, buildAppStoreUrl, buildClickPayload, createClickId, validateCampaignParams } = require("../campaign-attribution.js");
 
 const valid = "?pt=1234567890&ct=igMealPrep_01&utm_id=pvc26_install_mealprep_instagram_01&utm_source=Instagram&utm_medium=Organic&utm_campaign=MealPrep&utm_content=Reel_01";
 
@@ -45,10 +45,22 @@ test("rejects unsafe values, duplicate fields, and arbitrary parameters", () => 
   assert.equal(validateCampaignParams(valid + "&ct=another").valid, false);
 });
 
-test("allows the click write to finish after the bounded redirect", () => {
+test("tracks independently and leaves App Store navigation to the direct anchor tap", () => {
   const page = fs.readFileSync(path.join(__dirname, "../go/index.html"), "utf8");
   assert.match(page, /keepalive:\s*true/);
-  assert.doesNotMatch(page, /AbortController/);
+  assert.doesNotMatch(page, /location\.(replace|assign)|setTimeout\(redirect|\.finally\([^)]*redirect/);
+  assert.match(page, /link\.href = destination/);
+});
+
+test("creates a valid UUID when randomUUID is missing", () => {
+  const cryptoApi = {
+    getRandomValues(bytes) {
+      for (let index = 0; index < bytes.length; index += 1) bytes[index] = index;
+      return bytes;
+    }
+  };
+  assert.match(createClickId(cryptoApi), /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  assert.equal(createClickId(null), null);
 });
 
 test("the Instagram alias forwards to the tracked campaign URL without its own analytics", () => {
