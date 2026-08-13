@@ -52,7 +52,7 @@ test("tracks only a trusted App Store button tap without delaying navigation", (
   assert.doesNotMatch(page, /location\.(replace|assign)|setTimeout\(redirect|\.finally\([^)]*redirect/);
   assert.match(page, /link\.href = destination/);
   assert.match(page, /link\.addEventListener\("click"/);
-  assert.match(page, /!event\.isTrusted/);
+  assert.doesNotMatch(page, /event\.isTrusted/);
   assert.match(page, /if \(tracked/);
   const listenerAt = page.indexOf('link.addEventListener("click"');
   const fetchAt = page.indexOf('fetch("https://api.obedstudio.dev/v1/campaign-clicks"');

@@ -44,9 +44,10 @@
       link.href = destination;
       let tracked = false;
       link.addEventListener("click", function (event) {
-        // A page render or link-preview fetch is not a click. Require a real
-        // browser interaction and record at most once per landing-page visit.
-        if (tracked || !event.isTrusted) return;
+        // A page render or link-preview fetch is not a click. Record only the
+        // button event, at most once per landing-page visit. Do not reject
+        // synthetic events because assistive and embedded browsers vary.
+        if (tracked) return;
         const clickId = window.ProvechitoCampaign.createClickId(window.crypto);
         if (!clickId) return;
         tracked = true;
