@@ -48,6 +48,7 @@ test("rejects unsafe values, duplicate fields, and arbitrary parameters", () => 
 test("tracks only a trusted App Store button tap without delaying navigation", () => {
   const page = fs.readFileSync(path.join(__dirname, "../go/index.html"), "utf8");
   assert.match(page, /keepalive:\s*true/);
+  assert.doesNotMatch(page, /Content-Type/);
   assert.doesNotMatch(page, /location\.(replace|assign)|setTimeout\(redirect|\.finally\([^)]*redirect/);
   assert.match(page, /link\.href = destination/);
   assert.match(page, /link\.addEventListener\("click"/);

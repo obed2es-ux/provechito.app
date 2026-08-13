@@ -55,7 +55,6 @@
         // browsers. keepalive lets the request finish during App Store navigation.
         fetch("https://api.obedstudio.dev/v1/campaign-clicks", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(click),
           keepalive: true,
           credentials: "omit",
