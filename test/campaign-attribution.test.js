@@ -89,3 +89,24 @@ test("cross-platform aliases have unique immutable attribution identities", () =
   });
   assert.equal(new Set(pages).size, 3);
 });
+
+test("post-workout utility aliases are unique and cannot contaminate the Tinga campaign", () => {
+  const aliases = [
+    ["ig", "pvc26igpw40m01", "pvc26_install_postworkout40_instagram_202608_01", "utm_source=instagram", "reel_3mexicanmeals_40g_v01"],
+    ["fb", "pvc26fbpw40m01", "pvc26_install_postworkout40_facebook_202608_01", "utm_source=facebook", "reel_3mexicanmeals_40g_v01"],
+    ["yt", "pvc26ytpw40m01", "pvc26_install_postworkout40_youtube_202608_01", "utm_source=youtube", "short_3mexicanmeals_40g_v01"],
+    ["tt", "pvc26ttpw40m01", "pvc26_install_postworkout40_tiktok_202608_01", "utm_source=tiktok", "video_3mexicanmeals_40g_v01"]
+  ];
+  const identities = aliases.map(([platform, ct, utmId, source, content]) => {
+    const page = fs.readFileSync(path.join(__dirname, `../${platform}/postworkout40-01/index.html`), "utf8");
+    assert.ok(page.includes(`ct=${ct}`));
+    assert.ok(page.includes(`utm_id=${utmId}`));
+    assert.ok(page.includes(source));
+    assert.ok(page.includes(`utm_content=${content}`));
+    assert.ok(page.includes("utm_campaign=postworkout-protein-aug"));
+    assert.doesNotMatch(page, /tinga|real-food-macros-aug/i);
+    assert.doesNotMatch(page, /campaign-clicks|campaign-attribution\.js|apps\.apple\.com/);
+    return `${ct}:${utmId}`;
+  });
+  assert.equal(new Set(identities).size, 4);
+});
