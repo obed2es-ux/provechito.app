@@ -45,7 +45,7 @@ test("rejects unsafe values, duplicate fields, and arbitrary parameters", () => 
   assert.equal(validateCampaignParams(valid + "&ct=another").valid, false);
 });
 
-test("tracks only a trusted App Store button tap without delaying navigation", () => {
+test("tracks only an App Store button tap without delaying navigation", () => {
   const page = fs.readFileSync(path.join(__dirname, "../go/index.html"), "utf8");
   assert.match(page, /keepalive:\s*true/);
   assert.doesNotMatch(page, /Content-Type/);
