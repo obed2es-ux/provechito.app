@@ -72,3 +72,20 @@ test("the Instagram alias forwards to the tracked campaign URL without its own a
   assert.ok(page.includes(`href="${escapedCampaignUrl}"`));
   assert.doesNotMatch(page, /campaign-clicks|campaign-attribution\.js|apps\.apple\.com/);
 });
+
+test("cross-platform aliases have unique immutable attribution identities", () => {
+  const aliases = [
+    ["fb", "pvc26fbtinga01", "pvc26_install_macrotrackers_facebook_202608_01", "utm_source=facebook"],
+    ["tt", "pvc26tttinga01", "pvc26_install_macrotrackers_tiktok_202608_01", "utm_source=tiktok"],
+    ["yt", "pvc26yttinga01", "pvc26_install_macrotrackers_youtube_202608_01", "utm_source=youtube"]
+  ];
+  const pages = aliases.map(([pathName, ct, utmId, source]) => {
+    const page = fs.readFileSync(path.join(__dirname, `../${pathName}/index.html`), "utf8");
+    assert.ok(page.includes(`ct=${ct}`));
+    assert.ok(page.includes(`utm_id=${utmId}`));
+    assert.ok(page.includes(source));
+    assert.doesNotMatch(page, /campaign-clicks|campaign-attribution\.js|apps\.apple\.com/);
+    return page;
+  });
+  assert.equal(new Set(pages).size, 3);
+});
