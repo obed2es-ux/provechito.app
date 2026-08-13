@@ -45,11 +45,18 @@ test("rejects unsafe values, duplicate fields, and arbitrary parameters", () => 
   assert.equal(validateCampaignParams(valid + "&ct=another").valid, false);
 });
 
-test("tracks independently and leaves App Store navigation to the direct anchor tap", () => {
+test("tracks only a trusted App Store button tap without delaying navigation", () => {
   const page = fs.readFileSync(path.join(__dirname, "../go/index.html"), "utf8");
   assert.match(page, /keepalive:\s*true/);
   assert.doesNotMatch(page, /location\.(replace|assign)|setTimeout\(redirect|\.finally\([^)]*redirect/);
   assert.match(page, /link\.href = destination/);
+  assert.match(page, /link\.addEventListener\("click"/);
+  assert.match(page, /!event\.isTrusted/);
+  assert.match(page, /if \(tracked/);
+  const listenerAt = page.indexOf('link.addEventListener("click"');
+  const fetchAt = page.indexOf('fetch("https://api.obedstudio.dev/v1/campaign-clicks"');
+  assert.ok(listenerAt >= 0 && fetchAt > listenerAt, "tracking must be inside the click handler, never on page load");
+  assert.doesNotMatch(page.slice(0, listenerAt), /campaign-clicks/);
 });
 
 test("creates a valid UUID when randomUUID is missing", () => {

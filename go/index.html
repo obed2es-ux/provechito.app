@@ -42,11 +42,17 @@
       const destination = window.ProvechitoCampaign.buildAppStoreUrl(result.fields);
       const link = document.getElementById("continue-link");
       link.href = destination;
-      const clickId = window.ProvechitoCampaign.createClickId(window.crypto);
-      if (clickId) {
+      let tracked = false;
+      link.addEventListener("click", function (event) {
+        // A page render or link-preview fetch is not a click. Require a real
+        // browser interaction and record at most once per landing-page visit.
+        if (tracked || !event.isTrusted) return;
+        const clickId = window.ProvechitoCampaign.createClickId(window.crypto);
+        if (!clickId) return;
+        tracked = true;
         const click = window.ProvechitoCampaign.buildClickPayload(result.fields, clickId);
-        // Tracking must never delay or trigger navigation. Embedded browsers only
-        // permit the App Store handoff from the user's direct anchor tap.
+        // Never prevent or delay the direct anchor handoff required by embedded
+        // browsers. keepalive lets the request finish during App Store navigation.
         fetch("https://api.obedstudio.dev/v1/campaign-clicks", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -55,7 +61,7 @@
           credentials: "omit",
           referrerPolicy: "no-referrer"
         }).catch(function () {});
-      }
+      });
     })();
   </script>
 </body>
